@@ -395,7 +395,7 @@ h2 {
   font-size: 0.85rem;
 }
 
-.preco-original + .preco {
+.preco-original+.preco {
   color: var(--cor-destaque);
 }
 
@@ -573,6 +573,44 @@ h2 {
   color: var(--cor-frete);
 }
 
+.detalhe-estoque-esgotado {
+  color: var(--cor-erro);
+}
+
+.detalhe-frete {
+  margin: 0;
+  color: var(--cor-alerta);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.formulario-aviso {
+  display: grid;
+  gap: var(--espaco-2);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-4);
+}
+
+.formulario-aviso input {
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
+  background: var(--cor-fundo);
+}
+
+.aviso-aviso,
+.mensagem-aviso {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.mensagem-aviso {
+  color: var(--cor-frete);
+}
+
 .detalhe-garantias {
   list-style: none;
   margin: 0;
@@ -622,7 +660,7 @@ h2 {
   padding: var(--espaco-4);
 }
 
-.item-carrinho + .item-carrinho {
+.item-carrinho+.item-carrinho {
   border-top: 1px solid var(--cor-borda);
 }
 
@@ -731,6 +769,10 @@ h2 {
   font-weight: 600;
 }
 
+.resumo-linha-alerta {
+  color: var(--cor-alerta);
+}
+
 .total {
   font-size: 1.25rem;
   font-weight: 800;
@@ -821,6 +863,30 @@ h2 {
 
 .tabela tbody tr:last-child td {
   border-bottom: none;
+}
+
+.painel-espera {
+  margin-top: var(--espaco-6);
+  background: var(--cor-superficie);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  padding: var(--espaco-5);
+}
+
+.lista-espera {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--espaco-3);
+}
+
+.item-espera {
+  display: grid;
+  gap: var(--espaco-1);
+  padding: var(--espaco-3);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-pequeno);
 }
 
 /* Rodapé */

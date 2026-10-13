@@ -1,8 +1,17 @@
 // O carrinho guarda uma entrada por unidade adicionada.
 // Ex.: duas camisetas iguais = o mesmo produto duas vezes no array.
 
+function arredondarValor(valor) {
+  return Math.round((valor + Number.EPSILON) * 100) / 100
+}
+
 export function calcularTotal(carrinho) {
-  return carrinho.reduce((total, produto) => total + produto.price, 0)
+  const total = carrinho.reduce((soma, produto) => {
+    const preco = Number(produto?.price)
+    return soma + (Number.isFinite(preco) ? preco : 0)
+  }, 0)
+
+  return arredondarValor(total)
 }
 
 export function agruparItens(carrinho) {

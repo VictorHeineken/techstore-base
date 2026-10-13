@@ -1,7 +1,15 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router'
+import ProdutoCard from '../components/ProdutoCard'
+import { formatarPreco } from '../utils/formatarPreco'
+import { calcularFaltanteFrete, produtoDisponivel, produtoTemPrecoValido, temFreteGratis } from '../utils/produtos'
 
-export default function PaginaProduto({ produtos, onAdicionar }) {
+export default function PaginaProduto({ produtos, onAdicionar, listaEspera = [], onNotificar }) {
   const { id } = useParams()
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [mensagem, setMensagem] = useState('')
+
   const produto = produtos.find((item) => item.id === id)
 
   if (!produto) {
@@ -15,9 +23,34 @@ export default function PaginaProduto({ produtos, onAdicionar }) {
     )
   }
 
+  const disponivel = produtoDisponivel(produto)
+  const faltanteFrete = calcularFaltanteFrete(Number(produto.price) || 0)
+
   const relacionados = produtos
-    .filter((item) => item.category === produto.category && item.id !== produto.id)
+    .filter(
+      (item) =>
+        item.category === produto.category &&
+        item.id !== produto.id &&
+        produtoDisponivel(item)
+    )
     .slice(0, 4)
+
+  function lidarComAviso(evento) {
+    evento.preventDefault()
+
+    if (!nome.trim() || !email.trim()) {
+      setMensagem('Preencha nome e e-mail para receber a notificação.')
+      return
+    }
+
+    if (typeof onNotificar === 'function') {
+      onNotificar(produto.id, nome.trim(), email.trim())
+    }
+
+    setMensagem('Você foi cadastrado para receber a notificação quando o produto voltar.')
+    setNome('')
+    setEmail('')
+  }
 
   return (
     <section>
@@ -37,17 +70,55 @@ export default function PaginaProduto({ produtos, onAdicionar }) {
           <p className="card-avaliacao">
             ★ {produto.rating.rate} <span>({produto.rating.count} avaliações)</span>
           </p>
-          <p className="detalhe-preco">R$ {produto.price.toFixed(2).replace('.', ',')}</p>
-          <p className="detalhe-descricao">{produto.description}</p>
-          <p className="detalhe-estoque">{produto.estoque} unidades disponíveis</p>
 
-          <button
-            className="botao botao-grande"
-            onClick={() => onAdicionar(produto)}
-            disabled={produto.estoque === 0}
-          >
-            Adicionar ao carrinho
-          </button>
+          {produtoTemPrecoValido(produto) ? (
+            <p className="detalhe-preco">{formatarPreco(produto.price)}</p>
+          ) : (
+            <p className="detalhe-preco">Preço indisponível</p>
+          )}
+
+          <p className="detalhe-descricao">{produto.description}</p>
+          {produto.estoque === 0 ? (
+            <p className="detalhe-estoque detalhe-estoque-esgotado">Produto esgotado</p>
+          ) : (
+            <p className="detalhe-estoque">{produto.estoque} unidades disponíveis</p>
+          )}
+
+          {produtoTemPrecoValido(produto) && !temFreteGratis(Number(produto.price) || 0) && (
+            <p className="detalhe-frete">
+              Faltam {formatarPreco(faltanteFrete)} para ganhar frete grátis.
+            </p>
+          )}
+
+          {produto.estoque === 0 ? (
+            <form className="formulario-aviso" onSubmit={lidarComAviso}>
+              <p className="aviso-aviso">Receba um e-mail quando este item voltar ao estoque.</p>
+              <input
+                type="text"
+                value={nome}
+                onChange={(evento) => setNome(evento.target.value)}
+                placeholder="Seu nome"
+              />
+              <input
+                type="email"
+                value={email}
+                onChange={(evento) => setEmail(evento.target.value)}
+                placeholder="Seu e-mail"
+              />
+              <button type="submit" className="botao botao-grande">
+                Quero ser avisado
+              </button>
+              {mensagem && <p className="mensagem-aviso">{mensagem}</p>}
+            </form>
+          ) : (
+            <button
+              className="botao botao-grande"
+              onClick={() => onAdicionar(produto)}
+              disabled={!disponivel}
+            >
+              Adicionar ao carrinho
+            </button>
+          )}
 
           <ul className="detalhe-garantias">
             <li>Troca grátis em até 30 dias</li>
@@ -59,18 +130,7 @@ export default function PaginaProduto({ produtos, onAdicionar }) {
       <h2>Produtos relacionados</h2>
       <div className="grade">
         {relacionados.map((item) => (
-          <article key={item.id} className="card">
-            <Link to={`/produto/${item.id}`} className="card-link">
-              <div className="card-imagem-moldura">
-                <img src={item.image} alt={item.title} className="card-imagem" />
-              </div>
-              <h3 className="card-titulo">{item.title}</h3>
-            </Link>
-            <p className="preco">R$ {Number(item.price).toFixed(2).replace('.', ',')}</p>
-            <button className="botao" onClick={() => onAdicionar(item)}>
-              Adicionar ao carrinho
-            </button>
-          </article>
+          <ProdutoCard key={item.id} produto={item} onAdicionar={onAdicionar} />
         ))}
       </div>
     </section>

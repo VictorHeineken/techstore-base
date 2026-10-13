@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
-import SugestaoItem from '../components/SugestaoItem'
+import ProdutoCard from '../components/ProdutoCard'
 import { agruparItens, calcularTotal } from '../utils/carrinho'
 import { validarCupom } from '../utils/cupons'
 import { formatarPreco } from '../utils/formatarPreco'
+import { calcularFaltanteFrete, temFreteGratis } from '../utils/produtos'
 
 export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar, onRemover }) {
   const [codigoCupom, setCodigoCupom] = useState('')
@@ -13,6 +14,7 @@ export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar
   const itens = agruparItens(carrinho)
   const total = calcularTotal(carrinho)
   const totalComDesconto = cupomAplicado ? total * (1 - cupomAplicado.desconto) : total
+  const faltanteFrete = calcularFaltanteFrete(totalComDesconto)
 
   const sugestoes = produtos
     .filter((produto) => !carrinho.find((item) => item.id === produto.id))
@@ -53,13 +55,17 @@ export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar
         <ul className="lista-carrinho">
           {itens.map((item) => (
             <li key={item.produto.id} className="item-carrinho">
-              <div className="item-imagem-moldura">
+              <Link to={`/produto/${item.produto.id}`} className="item-imagem-moldura" aria-label={`Abrir ${item.produto.title}`}>
                 <img src={item.produto.image} alt={item.produto.title} />
-              </div>
+              </Link>
+
               <div className="item-info">
-                <p className="item-titulo">{item.produto.title}</p>
-                <p className="item-preco">R$ {item.produto.price}</p>
+                <Link to={`/produto/${item.produto.id}`} className="item-titulo-link">
+                  <p className="item-titulo">{item.produto.title}</p>
+                </Link>
+                <p className="item-preco">{formatarPreco(item.produto.price)}</p>
               </div>
+
               <span className="item-quantidade">{item.quantidade} un.</span>
               <button className="botao-texto" onClick={() => onRemover(item.produto.id)}>
                 Remover 1
@@ -93,6 +99,14 @@ export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar
               <span>{cupomAplicado.desconto * 100}%</span>
             </p>
           )}
+
+          {!temFreteGratis(totalComDesconto) && (
+            <p className="resumo-linha resumo-linha-alerta">
+              <span>Frete</span>
+              <span>Faltam {formatarPreco(faltanteFrete)} para frete grátis</span>
+            </p>
+          )}
+
           <p className="total">
             <span>Total</span>
             <span>{formatarPreco(totalComDesconto)}</span>
@@ -103,7 +117,7 @@ export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar
       <h2>Você também pode gostar</h2>
       <div className="sugestoes">
         {sugestoes.map((produto) => (
-          <SugestaoItem key={produto.id} produto={produto} onAdicionar={onAdicionar} />
+          <ProdutoCard key={produto.id} produto={produto} onAdicionar={onAdicionar} />
         ))}
       </div>
     </section>

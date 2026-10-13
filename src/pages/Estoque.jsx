@@ -1,7 +1,22 @@
 // Página usada pelo time de estoque para acompanhar a quantidade de cada produto
-export default function Estoque({ produtos }) {
-  // slice cria uma cópia, para o sort não alterar a lista original
+export default function Estoque({ produtos, listaEspera = [] }) {
   const ordenados = produtos.slice().sort((a, b) => a.estoque - b.estoque)
+
+  const clientesEsperando = listaEspera.reduce((acumulador, item) => {
+    const produto = produtos.find((produtoAtual) => produtoAtual.id === item.produtoId)
+
+    if (!produto) {
+      return acumulador
+    }
+
+    acumulador.push({
+      ...item,
+      produto: produto.title,
+      categoria: produto.category,
+    })
+
+    return acumulador
+  }, [])
 
   return (
     <section>
@@ -31,11 +46,31 @@ export default function Estoque({ produtos }) {
                     <span className="selo selo-alerta">Repor</span>
                   )}
                   {produto.estoque >= 5 && <span className="selo selo-ok">OK</span>}
+                  {typeof produto.price !== 'number' && (
+                    <span className="selo selo-alerta">Sem preço</span>
+                  )}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="painel-espera">
+        <h2>Clientes aguardando retorno</h2>
+        {clientesEsperando.length === 0 ? (
+          <p className="aviso">Nenhum cliente está esperando um produto voltar ao estoque.</p>
+        ) : (
+          <ul className="lista-espera">
+            {clientesEsperando.map((cliente) => (
+              <li key={cliente.id} className="item-espera">
+                <strong>{cliente.produto}</strong>
+                <span>{cliente.nome}</span>
+                <span>{cliente.email}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   )

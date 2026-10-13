@@ -9,6 +9,7 @@ import Carrinho from './pages/Carrinho'
 import Estoque from './pages/Estoque'
 import { buscarProdutos } from './services/produtos'
 import { buscarClientes } from './services/clientes'
+import { produtoDisponivel } from './utils/produtos'
 
 export default function App() {
   const [produtos, setProdutos] = useState([])
@@ -17,6 +18,7 @@ export default function App() {
   const [carrinho, setCarrinho] = useState([])
   const [clientes, setClientes] = useState([])
   const [clienteAtualId, setClienteAtualId] = useState(null)
+  const [listaEspera, setListaEspera] = useState([])
 
   useEffect(() => {
     buscarProdutos()
@@ -31,14 +33,26 @@ export default function App() {
   }, [])
 
   function adicionarAoCarrinho(produto) {
-    setCarrinho(carrinho.concat(produto))
+    if (!produto || !produtoDisponivel(produto)) return
+    setCarrinho((atual) => atual.concat(produto))
+  }
+
+  function adicionarNaListaEspera(produtoId, nome, email) {
+    const item = {
+      id: `${produtoId}-${Date.now()}`,
+      produtoId,
+      nome,
+      email,
+    }
+
+    setListaEspera((atual) => [...atual, item])
   }
 
   function removerUmaUnidade(produtoId) {
     // Remove só a primeira unidade encontrada do produto
     let removido = false
-    setCarrinho(
-      carrinho.filter((produto) => {
+    setCarrinho((atual) =>
+      atual.filter((produto) => {
         if (!removido && produto.id === produtoId) {
           removido = true
           return false
@@ -67,7 +81,14 @@ export default function App() {
             />
             <Route
               path="/produto/:id"
-              element={<PaginaProduto produtos={produtos} onAdicionar={adicionarAoCarrinho} />}
+              element={
+                <PaginaProduto
+                  produtos={produtos}
+                  onAdicionar={adicionarAoCarrinho}
+                  listaEspera={listaEspera}
+                  onNotificar={adicionarNaListaEspera}
+                />
+              }
             />
             <Route
               path="/carrinho"
@@ -81,7 +102,7 @@ export default function App() {
                 />
               }
             />
-            <Route path="/estoque" element={<Estoque produtos={produtos} />} />
+            <Route path="/estoque" element={<Estoque produtos={produtos} listaEspera={listaEspera} />} />
           </Routes>
         )}
       </main>
