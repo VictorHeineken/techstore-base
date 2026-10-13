@@ -49,17 +49,15 @@ export default function App() {
   }
 
   function removerUmaUnidade(produtoId) {
-    // Remove só a primeira unidade encontrada do produto
-    let removido = false
-    setCarrinho((atual) =>
-      atual.filter((produto) => {
-        if (!removido && produto.id === produtoId) {
-          removido = true
-          return false
-        }
-        return true
-      })
-    )
+    setCarrinho((atual) => {
+      const indice = atual.findIndex((produto) => produto.id === produtoId)
+
+      if (indice === -1) {
+        return atual
+      }
+
+      return atual.filter((_, index) => index !== indice)
+    })
   }
 
   const clienteAtual = clientes.find((cliente) => cliente.id === clienteAtualId)

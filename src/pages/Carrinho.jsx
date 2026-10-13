@@ -55,19 +55,36 @@ export default function Carrinho({ carrinho, produtos, clienteAtual, onAdicionar
         <ul className="lista-carrinho">
           {itens.map((item) => (
             <li key={item.produto.id} className="item-carrinho">
-              <Link to={`/produto/${item.produto.id}`} className="item-imagem-moldura" aria-label={`Abrir ${item.produto.title}`}>
+              <Link
+                to={`/produto/${item.produto.id}`}
+                className="item-imagem-moldura"
+                aria-label={`Abrir ${item.produto.title}`}
+                onClick={(evento) => evento.stopPropagation()}
+              >
                 <img src={item.produto.image} alt={item.produto.title} />
               </Link>
 
               <div className="item-info">
-                <Link to={`/produto/${item.produto.id}`} className="item-titulo-link">
+                <Link
+                  to={`/produto/${item.produto.id}`}
+                  className="item-titulo-link"
+                  onClick={(evento) => evento.stopPropagation()}
+                >
                   <p className="item-titulo">{item.produto.title}</p>
                 </Link>
                 <p className="item-preco">{formatarPreco(item.produto.price)}</p>
               </div>
 
               <span className="item-quantidade">{item.quantidade} un.</span>
-              <button className="botao-texto" onClick={() => onRemover(item.produto.id)}>
+              <button
+                type="button"
+                className="botao-texto"
+                onClick={(evento) => {
+                  evento.preventDefault()
+                  evento.stopPropagation()
+                  onRemover(item.produto.id)
+                }}
+              >
                 Remover 1
               </button>
             </li>
